@@ -9,6 +9,8 @@ App::App()
 	CPU_CALLBACK_RENDER(OnRender);
 
 	m_pShip = nullptr;
+
+	// CATCHER //
 }
 
 App::~App()
@@ -59,7 +61,7 @@ void App::OnStart()
 	m_font.Create(cpuDevice.GetHeight()<=512 ? 14 : 28);
 	m_textureBird.Load("bird_amiga.png");
 	m_textureEarth.Load("earth.png");
-	m_meshShip.CreateSpaceship();
+	m_meshShip.CreateCube();
 	m_meshMissile.CreateSphere(0.5f);
 	m_meshSphere.CreateSphere(2.0f, 12, 12);
 	m_rts[0] = cpuEngine.CreateRT();
@@ -92,7 +94,7 @@ void App::OnStart()
 
 	// Ship
 	m_pShip = new Ship;
-	m_pShip->Create(&m_meshShip, &m_materialShip);
+	m_pShip->Create(&m_meshShip, nullptr);
 	m_pShip->GetFSM()->ToState(CPU_ID(StateShipIdle));
 
 	// Particle
@@ -128,7 +130,28 @@ void App::OnStart()
 	//pE->pMaterial->pTexture = &m_textureEarth;
 
 	// Camera
-	cpuEngine.GetCamera()->transform.pos.z = -5.0f;
+
+	// CATCHER //
+
+	m_meshCircleRail.CreateCircle(2.0f, 32, CPU_WHITE);
+	m_entityCircleRail = cpuEngine.CreateEntity();
+	m_entityCircleRail->pMesh = &m_meshCircleRail;
+
+	m_meshCircleBlack.CreateCircle(1.8f, 32, CPU_BLACK);
+	m_entityCircleBlack = cpuEngine.CreateEntity();
+	m_entityCircleBlack->pMesh = &m_meshCircleBlack;
+	m_entityCircleBlack->transform.pos.y += 0.1f;
+
+
+	float lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche = 2.0f;
+	cpu_camera* cam = cpuEngine.GetCamera();
+	cam->transform.pos.y = 5.0f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
+	cam->transform.pos.z = -5.0f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
+	cam->transform.SetYPR(0.0f, 0.6f, 0.0f);
+
+
+
+
 }
 
 void App::OnUpdate()
@@ -197,6 +220,11 @@ void App::OnUpdate()
 		else
 			++it;
 	}
+
+	// CATCHER //
+
+
+
 
 	// Quit
 	if ( cpuInput.IsBackPressed() )
@@ -279,6 +307,20 @@ void App::MoonShader(cpu_ps_io& io)
 	io.color.z = io.p.color.z;
 }
 
+void App::SpawnElement()
+{
+	//faire spawn aléatoire au tour du cercle en variant les pos autour et faire descendre le y
+
+	cpu_entity* element = cpuEngine.CreateEntity();
+	element->pMesh = &m_meshMissile;
+	element->transform.SetScaling(0.2f);
+	element->transform.pos = ray.pos;
+	element->transform.LookTo(ray.dir);
+	element->transform.Move(1.5f);
+	element->pMaterial = &m_materialMissile;
+	m_elements.push_back(element);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,6 +343,9 @@ void Ship::Create(cpu_mesh* pMesh, cpu_material* pMaterial)
 	m_pEntity->transform.pos.z = 5.0f;
 	m_pEntity->transform.pos.y = -3.0f;
 
+	m_pEntity->transform.SetYPR(2.0, 1.3f, 4.55f);
+	
+
 	m_pFSM = cpuEngine.CreateFSM(this);
 	m_pFSM->SetPostGlobal<StateShipGlobal>();
 	m_pFSM->Add<StateShipIdle>();
@@ -322,6 +367,8 @@ void Ship::Update()
 
 	//// Move ship
 	//m_pEntity->transform.pos.z += dt * 1.0f;
+
+	//orientation
 
 	float speed = XM_PI;
 	static float angle = 0.0f;
@@ -346,10 +393,29 @@ void Ship::Update()
 	//m_pEntity->transform
 	m_pEntity->transform.SetYPR(angle, 0.0f, angle2);
 
-	if (cpuInput.IsUp())
-		m_pEntity->transform.Move(dt * 4.0f);
+	//mouvement
+
+	static float angleMouv = 0.0f;
+
+	/*if (cpuInput.IsUp())
+		m_pEntity->transform.Move(dt * 6.0f);
 	if (cpuInput.IsDown())
-		m_pEntity->transform.Move(-dt * 4.0f);
+		m_pEntity->transform.Move(-dt * 6.0f);*/
+
+	if (cpuInput.IsUp())
+		angleMouv += dt * speed;
+	if (cpuInput.IsDown())
+		angleMouv += dt * -speed;
+
+	cpu_entity* rail = App::GetInstance().GetRail();
+
+	m_pEntity->transform.OrbitAroundAxis(rail->transform.pos, CPU_VEC3_UP, rail->pMesh->radius, angleMouv);
+
+
+	/*if (cpuInput.IsUp())
+		m_pEntity->transform.Move(dt * 6.0f);
+	if (cpuInput.IsDown())
+		m_pEntity->transform.Move(-dt * 6.0f);*/
 
 
 	XMFLOAT3 pos = m_pEntity->transform.pos;
@@ -375,14 +441,14 @@ void Ship::Update()
 
 	//camera
 
-	float mul = 10.0f;
+	/*float mul = 10.0f;
 
 	float x = pos.x - dir.x * mul;
 	float y = pos.y - dir.y * mul;
 	float z = pos.z - dir.z * mul;
-	x += up.x * 4.0f;
-	y += up.y * 4.0f;
-	z += up.z * 4.0f;
+	x += up.x * 6.0f;
+	y += up.y * 6.0f;
+	z += up.z * 6.0f;
 
 	cpuEngine.GetCamera()->transform.SetPosition(x, y, z);
 
@@ -390,7 +456,7 @@ void Ship::Update()
 
 	cpuEngine.GetCamera()->transform.quat = quat;
 	cpuEngine.GetCamera()->transform.SetRotationFromQuaternion();
-	cpuEngine.GetCamera()->transform.AddYPR(0.0f, 0.10f);
+	cpuEngine.GetCamera()->transform.AddYPR(0.0f, 0.64f);*/
 
 	// Fire
 	if ( cpuInput.vi.IsKey(VK_SPACE) )

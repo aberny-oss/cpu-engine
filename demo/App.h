@@ -19,6 +19,10 @@ public:
 	static void MissileShader(cpu_ps_io& io);
 	static void MoonShader(cpu_ps_io& io);
 
+	cpu_entity* GetRail() { return m_entityCircleRail; }
+
+	void SpawnElement();
+
 private:
 	inline static App* s_pApp = nullptr;
 
@@ -48,6 +52,19 @@ private:
 	cpu_entity* m_pMoon;
 	cpu_particle_emitter* m_pEmitter;
 	cpu_particle_emitter* m_pEmitter2;
+
+	// CATCHER //
+
+	cpu_mesh m_meshCircleRail;
+	cpu_entity* m_entityCircleRail;
+
+	cpu_mesh m_meshCircleBlack;
+	cpu_entity* m_entityCircleBlack;
+
+	std::list<cpu_entity*> m_elements;
+
+
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
