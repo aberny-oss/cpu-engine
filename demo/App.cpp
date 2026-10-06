@@ -323,26 +323,58 @@ void Ship::Update()
 	//// Move ship
 	//m_pEntity->transform.pos.z += dt * 1.0f;
 
-	if (cpuInput.IsUp())
-		m_pEntity->transform.Move(dt * 2.0f);
-	if (cpuInput.IsDown())
-		m_pEntity->transform.Move(-dt * 2.0f);
+	float speed = XM_PI;
+	static float angle = 0.0f;
 	if (cpuInput.IsLeft())
-		m_pEntity->transform.AddYPR(-dt * XM_PI);
+		angle += dt * -speed;
 	if (cpuInput.IsRight())
-		m_pEntity->transform.AddYPR(dt * XM_PI);
+		angle += dt * speed;
+
+	m_pEntity->transform.SetYPR(angle);
+
+	if (cpuInput.IsUp())
+		m_pEntity->transform.Move(dt * 4.0f);
+	if (cpuInput.IsDown())
+		m_pEntity->transform.Move(-dt * 4.0f);
+
 
 	XMFLOAT3 pos = m_pEntity->transform.pos;
 	XMFLOAT3 dir = m_pEntity->transform.dir;
 	XMFLOAT3 up = m_pEntity->transform.up;
-	float mul = 10.0;
 
-	cpuEngine.GetCamera()->transform.SetPosition(pos.x - dir.x * mul, pos.y - dir.y * mul + up.y * 3, pos.z - dir.z * mul);
+
+	if (cpuInput.vi.IsKey('O'))
+	{
+		pos.x += up.x * 20.0f * dt;
+		pos.y += up.y * 20.0f * dt;
+		pos.z += up.z * 20.0f * dt;
+	}
+	if (cpuInput.vi.IsKey('L'))
+	{
+		pos.x += -up.x * 20.0f * dt;
+		pos.y += -up.y * 20.0f * dt;
+		pos.z += -up.z * 20.0f * dt;
+	}
+	m_pEntity->transform.pos = pos;
+
+
+
+	float mul = 10.0f;
+
+	float x = pos.x - dir.x * mul;
+	float y = pos.y - dir.y * mul;
+	float z = pos.z - dir.z * mul;
+	x += up.x * 4.0f;
+	y += up.y * 4.0f;
+	z += up.z * 4.0f;
+
+	cpuEngine.GetCamera()->transform.SetPosition(x, y, z);
 
 	XMFLOAT4 quat = m_pEntity->transform.quat;
 
 	cpuEngine.GetCamera()->transform.quat = quat;
 	cpuEngine.GetCamera()->transform.SetRotationFromQuaternion();
+	cpuEngine.GetCamera()->transform.AddYPR(0.0f, 0.10f);
 
 	// Fire
 	if ( cpuInput.vi.IsKey(VK_SPACE) )
