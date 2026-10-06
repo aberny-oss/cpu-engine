@@ -330,7 +330,21 @@ void Ship::Update()
 	if (cpuInput.IsRight())
 		angle += dt * speed;
 
-	m_pEntity->transform.SetYPR(angle);
+	//m_pEntity->transform.SetYPR(angle);
+
+	static float angle2 = 0.0f;
+
+	if (cpuInput.vi.IsKey('K'))
+	{
+		angle2 += dt * -speed;
+	}
+	if (cpuInput.vi.IsKey('M'))
+	{
+		angle2 += dt * speed;
+	}
+
+	//m_pEntity->transform
+	m_pEntity->transform.SetYPR(angle, 0.0f, angle2);
 
 	if (cpuInput.IsUp())
 		m_pEntity->transform.Move(dt * 4.0f);
@@ -357,7 +371,9 @@ void Ship::Update()
 	}
 	m_pEntity->transform.pos = pos;
 
+	
 
+	//camera
 
 	float mul = 10.0f;
 
