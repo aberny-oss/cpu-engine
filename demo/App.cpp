@@ -150,14 +150,14 @@ void App::OnStart()
 
 	float lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche = 2.0f;
 	cpu_camera* cam = cpuEngine.GetCamera();
-	cam->transform.pos.y = 5.0f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
+	cam->transform.pos.y = 1.5f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
 	cam->transform.pos.z = -5.0f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
-	cam->transform.SetYPR(0.0f, 0.6f, 0.0f);
+	cam->transform.SetYPR(0.0f, 0.2f, 0.0f);
 
 	m_elementspeed = 1.0f;
 	m_intervalSpawn = 1.0f;
 	m_timestock = 0.0f;
-
+	m_score = 0;
 
 }
 
@@ -232,6 +232,7 @@ void App::OnUpdate()
 
 	SpawnElement();
 	UpdateElement();
+	CheckCollisionElement();
 
 
 	// Quit
@@ -273,17 +274,17 @@ void App::OnRender(int pass)
 		case CPU_PASS_UI_END:
 		{
 			// Debug
-			cpu_stats& stats = *cpuEngine.GetStats();
+			/*cpu_stats& stats = *cpuEngine.GetStats();
 			std::string info = CPU_STR(cpuTime.fps) + " fps, ";
 			info += CPU_STR(stats.drawnTriangleCount) + " triangles, ";
 			info += CPU_STR(stats.clipEntityCount) + " clipped entities\n";
 			info += CPU_STR(m_missiles.size()) + " missiles, ";
 			info += CPU_STR(cpuEngine.GetParticleData()->alive) + " particles, ";
 			info += CPU_STR(stats.threadCount) + " threads, ";
-			info += CPU_STR(stats.tileCount) + " tiles";
+			info += CPU_STR(stats.tileCount) + " tiles";*/
 
 			// Ray cast
-			cpu_ray ray;
+			/*cpu_ray ray;
 			cpuEngine.GetCursorRay(ray);
 			cpu_hit hit;
 			cpu_entity* pEntity = cpuEngine.HitEntity(hit, ray);
@@ -294,7 +295,13 @@ void App::OnRender(int pass)
 			}
 
 			XMFLOAT3 tint = { 1.0f, 1.0f, 0.8f };
-			cpuDevice.DrawText(&m_font, info.c_str(), (int)(cpuDevice.GetWidth()*0.5f), 10, CPU_TEXT_CENTER, &tint);
+			cpuDevice.DrawText(&m_font, info.c_str(), (int)(cpuDevice.GetWidth()*0.5f), 10, CPU_TEXT_CENTER, &tint);*/
+
+			std::string info = "SCORE : " + CPU_STR(m_score);
+
+			XMFLOAT3 tint = { 1.0f, 1.0f, 0.8f };
+			cpuDevice.DrawText(&m_font, info.c_str(), (int)(cpuDevice.GetWidth() * 0.5f), 10, CPU_TEXT_CENTER, &tint);
+
 			break;
 		}
 	}
@@ -384,6 +391,48 @@ void App::UpdateElement()
 			++it;
 		}
 	}
+}
+
+void App::CheckCollisionElement()
+{
+	const float radiusRed = 0.125;
+	const float raduisPlayer = 0.2f;
+
+	Ship* player = m_pShip;
+	XMFLOAT3 pos2 = player->GetEntity()->transform.pos;
+
+	for (auto it = m_elements.begin(); it != m_elements.end();)
+	{
+		cpu_entity* entity1 = *it;
+		XMFLOAT3 pos1 = entity1->transform.pos;
+		float posx = (pos1.x - pos2.x) * (pos1.x - pos2.x);
+		float posy = (pos1.y - pos2.y) * (pos1.y - pos2.y);
+		float posz = (pos1.z - pos2.z) * (pos1.z - pos2.z);
+		
+		float distanceSQ = posx + posy + posz;
+
+		float sommeradius = radiusRed + raduisPlayer;
+		float carreSomme = sommeradius * sommeradius;
+
+		if (distanceSQ < carreSomme)
+		{
+			ResolveCollisionElement(entity1);
+			cpuEngine.Release(entity1);
+			it = m_elements.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void App::ResolveCollisionElement(cpu_entity* p_red)
+{
+	m_score += 1;
+
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

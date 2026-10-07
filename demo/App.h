@@ -24,6 +24,8 @@ public:
 
 	void SpawnElement();
 	void UpdateElement();
+	void CheckCollisionElement();
+	void ResolveCollisionElement(cpu_entity* p_red);
 
 private:
 	inline static App* s_pApp = nullptr;
@@ -68,6 +70,8 @@ private:
 
 	float m_intervalSpawn;
 	float m_timestock;
+
+	int m_score;
 
 
 
