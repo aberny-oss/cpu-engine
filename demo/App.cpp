@@ -353,7 +353,7 @@ void App::SpawnElement()
 	XMFLOAT3 up = element->transform.up;
 
 	pos.x = resultposX;
-	pos.y += 2.0f;
+	pos.y += 3.0f;
 	pos.z += resultposZ;
 
 	element->transform.pos = pos;
