@@ -64,7 +64,9 @@ void App::OnStart()
 	m_font.Create(cpuDevice.GetHeight()<=512 ? 14 : 28);
 	m_textureBird.Load("bird_amiga.png");
 	m_textureEarth.Load("earth.png");
-	m_meshShip.CreateCube();
+
+	m_meshShip.CreateCube(0.2f); // Cube PLAYER
+
 	m_meshMissile.CreateSphere(0.5f);
 	m_meshSphere.CreateSphere(2.0f, 12, 12);
 	m_rts[0] = cpuEngine.CreateRT();
@@ -403,8 +405,8 @@ void Ship::Create(cpu_mesh* pMesh, cpu_material* pMaterial)
 	m_pEntity = cpuEngine.CreateEntity();
 	m_pEntity->pMesh = pMesh;
 	m_pEntity->pMaterial = pMaterial;
-	m_pEntity->transform.pos.z = 5.0f;
-	m_pEntity->transform.pos.y = -3.0f;
+	m_pEntity->transform.pos.z = 0.0f;
+	m_pEntity->transform.pos.y = 0.0f;
 
 	m_pEntity->transform.SetYPR(2.0, 1.3f, 4.55f);
 	
@@ -471,8 +473,10 @@ void Ship::Update()
 		angleMouv += dt * -speed;
 
 	cpu_entity* rail = App::GetInstance().GetBlackRail();
+	XMFLOAT3 posPlayerRail = rail->transform.pos;
+	posPlayerRail.y += 0.2f;
 
-	m_pEntity->transform.OrbitAroundAxis(rail->transform.pos, CPU_VEC3_UP, rail->pMesh->radius, angleMouv);
+	m_pEntity->transform.OrbitAroundAxis(posPlayerRail, CPU_VEC3_UP, rail->pMesh->radius * 0.8f, angleMouv);
 
 
 	/*if (cpuInput.IsUp())
