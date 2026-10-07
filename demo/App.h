@@ -20,8 +20,10 @@ public:
 	static void MoonShader(cpu_ps_io& io);
 
 	cpu_entity* GetRail() { return m_entityCircleRail; }
+	cpu_entity* GetBlackRail() { return m_entityCircleBlack; }
 
 	void SpawnElement();
+	void UpdateElement();
 
 private:
 	inline static App* s_pApp = nullptr;
@@ -62,6 +64,9 @@ private:
 	cpu_entity* m_entityCircleBlack;
 
 	std::list<cpu_entity*> m_elements;
+	float m_elementspeed;
+
+	float m_
 
 
 

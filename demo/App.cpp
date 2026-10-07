@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <iostream>
 
 App::App()
 {
@@ -11,6 +12,8 @@ App::App()
 	m_pShip = nullptr;
 
 	// CATCHER //
+
+	srand(time(NULL));
 }
 
 App::~App()
@@ -98,7 +101,7 @@ void App::OnStart()
 	m_pShip->GetFSM()->ToState(CPU_ID(StateShipIdle));
 
 	// Particle
-	cpuEngine.GetParticleData()->Create(2000000);
+	/*cpuEngine.GetParticleData()->Create(2000000);
 	cpuEngine.GetParticlePhysics()->gy = -0.5f;
 	m_pEmitter = cpuEngine.CreateParticleEmitter();
 	m_pEmitter->rate = 1.0f;
@@ -108,7 +111,7 @@ void App::OnStart()
 	m_pEmitter2->rate = 0.25f;
 	m_pEmitter2->colorMin = cpu::ToColor(0, 0, 255);
 	m_pEmitter2->colorMax = cpu::ToColor(0, 128, 255);
-	m_pEmitter2->pos.x = -2.0f;
+	m_pEmitter2->pos.x = -2.0f;*/
 
 	// Test
 	//m_pEmitter->blend = CPU_PARTICLE_OPAQUE;
@@ -149,7 +152,7 @@ void App::OnStart()
 	cam->transform.pos.z = -5.0f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
 	cam->transform.SetYPR(0.0f, 0.6f, 0.0f);
 
-
+	m_elementspeed = 1.0f;
 
 
 }
@@ -169,11 +172,11 @@ void App::OnUpdate()
 
 	// Move rock
 	m_pMoon->transform.OrbitAroundAxis(m_pEarth->transform.pos, CPU_VEC3_UP, 3.0f, time*2.0f);
-	m_pEmitter->pos = m_pMoon->transform.pos;
+	/*m_pEmitter->pos = m_pMoon->transform.pos;
 	m_pEmitter->dir = m_pMoon->transform.dir;
 	m_pEmitter->dir.x = -m_pEmitter->dir.x; 
 	m_pEmitter->dir.y = -m_pEmitter->dir.y; 
-	m_pEmitter->dir.z = -m_pEmitter->dir.z; 
+	m_pEmitter->dir.z = -m_pEmitter->dir.z; */
 
 	// Turn camera
 	//cpuEngine.GetCamera()->transform.AddYPR(0.0f, 0.0f, dt*30.0f);
@@ -223,7 +226,8 @@ void App::OnUpdate()
 
 	// CATCHER //
 
-
+	SpawnElement();
+	UpdateElement();
 
 
 	// Quit
@@ -309,16 +313,68 @@ void App::MoonShader(cpu_ps_io& io)
 
 void App::SpawnElement()
 {
+	float dt = cpuTime.delta;
+
+
+
 	//faire spawn aléatoire au tour du cercle en variant les pos autour et faire descendre le y
+
+	cpu_entity* circleRail = App::GetInstance().GetBlackRail();
+
+	float resultposX = 0.0f;
+	float resultposZ = 0.0f;
+
+	constexpr float pi180 = 3.141593f * (1.0f / 180.0f);
+
+	int a = 0;
+	a = rand() % 360;
+
+	XMFLOAT3 posCR = circleRail->transform.pos;
+	float rayon = 1.8f;
+
+	float rad = a * pi180;
+	resultposX = posCR.x + cos(rad) * rayon;
+	resultposZ = posCR.z + sin(rad) * rayon;
+
 
 	cpu_entity* element = cpuEngine.CreateEntity();
 	element->pMesh = &m_meshMissile;
 	element->transform.SetScaling(0.2f);
-	element->transform.pos = ray.pos;
-	element->transform.LookTo(ray.dir);
-	element->transform.Move(1.5f);
 	element->pMaterial = &m_materialMissile;
+
+	XMFLOAT3 pos = element->transform.pos;
+	XMFLOAT3 up = element->transform.up;
+
+	pos.x = resultposX;
+	pos.y += 2.0f;
+	pos.z += resultposZ;
+
+	element->transform.pos = pos;
+
 	m_elements.push_back(element);
+}
+
+void App::UpdateElement()
+{
+	float dt = cpuTime.delta;
+
+	for (auto it = m_elements.begin(); it != m_elements.end();)
+	{
+		cpu_entity* pMissile = *it;
+		XMFLOAT3 pos = pMissile->transform.pos;
+		XMFLOAT3 up = pMissile->transform.up;
+		pos.y += -up.y * m_elementspeed * dt;
+		pMissile->transform.pos = pos;
+		if (pMissile->transform.pos.y < 0.0f)
+		{
+			cpuEngine.Release(pMissile);
+			it = m_elements.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +463,7 @@ void Ship::Update()
 	if (cpuInput.IsDown())
 		angleMouv += dt * -speed;
 
-	cpu_entity* rail = App::GetInstance().GetRail();
+	cpu_entity* rail = App::GetInstance().GetBlackRail();
 
 	m_pEntity->transform.OrbitAroundAxis(rail->transform.pos, CPU_VEC3_UP, rail->pMesh->radius, angleMouv);
 
