@@ -21,6 +21,7 @@ public:
 
 	cpu_entity* GetRail() { return m_entityCircleRail; }
 	cpu_entity* GetBlackRail() { return m_entityCircleBlack; }
+	bool GetPause() { return m_pause; }
 
 	void SpawnElement();
 	void UpdateElement();
@@ -72,6 +73,9 @@ private:
 	float m_timestock;
 
 	int m_score;
+	int m_life;
+
+	bool m_pause;
 
 
 

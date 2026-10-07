@@ -158,12 +158,18 @@ void App::OnStart()
 	m_intervalSpawn = 1.0f;
 	m_timestock = 0.0f;
 	m_score = 0;
+	m_life = 3;
+	m_pause = false;
 
 }
 
 void App::OnUpdate()
 {
 	// YOUR CODE HERE
+	if (m_pause == true)
+	{
+		return;
+	}
 
 	float dt = cpuTime.delta;
 	float time = cpuTime.total;
@@ -298,6 +304,8 @@ void App::OnRender(int pass)
 			cpuDevice.DrawText(&m_font, info.c_str(), (int)(cpuDevice.GetWidth()*0.5f), 10, CPU_TEXT_CENTER, &tint);*/
 
 			std::string info = "SCORE : " + CPU_STR(m_score);
+			info += "\n";
+			info += "La Vie La Vrai : " + CPU_STR(m_life);
 
 			XMFLOAT3 tint = { 1.0f, 1.0f, 0.8f };
 			cpuDevice.DrawText(&m_font, info.c_str(), (int)(cpuDevice.GetWidth() * 0.5f), 10, CPU_TEXT_CENTER, &tint);
@@ -385,6 +393,12 @@ void App::UpdateElement()
 		{
 			cpuEngine.Release(pMissile);
 			it = m_elements.erase(it);
+			m_life -= 1;
+			if (m_life <= 0)
+			{
+				m_pause = true;
+				m_life = 0;
+			}
 		}
 		else
 		{
@@ -474,6 +488,11 @@ void Ship::Destroy()
 
 void Ship::Update()
 {
+	if (App::GetInstance().GetPause() == true)
+	{
+		return;
+	}
+
 	float dt = cpuTime.delta;
 
 	//// Turn ship
