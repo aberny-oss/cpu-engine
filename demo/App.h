@@ -66,7 +66,8 @@ private:
 	std::list<cpu_entity*> m_elements;
 	float m_elementspeed;
 
-	float m_
+	float m_intervalSpawn;
+	float m_timestock;
 
 
 

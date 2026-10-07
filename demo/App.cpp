@@ -153,6 +153,8 @@ void App::OnStart()
 	cam->transform.SetYPR(0.0f, 0.6f, 0.0f);
 
 	m_elementspeed = 1.0f;
+	m_intervalSpawn = 1.0f;
+	m_timestock = 0.0f;
 
 
 }
@@ -315,7 +317,12 @@ void App::SpawnElement()
 {
 	float dt = cpuTime.delta;
 
-
+	m_timestock += dt;
+	if (m_timestock < m_intervalSpawn)
+	{
+		return;
+	}
+	m_timestock = 0.0f;
 
 	//faire spawn aléatoire au tour du cercle en variant les pos autour et faire descendre le y
 
