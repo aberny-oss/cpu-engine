@@ -165,6 +165,10 @@ void App::OnStart()
 
 void App::OnUpdate()
 {
+	// Quit
+	if (cpuInput.IsBackPressed())
+		cpuEngine.Quit();
+
 	// YOUR CODE HERE
 	if (m_pause == true)
 	{
@@ -240,10 +244,6 @@ void App::OnUpdate()
 	UpdateElement();
 	CheckCollisionElement();
 
-
-	// Quit
-	if ( cpuInput.IsBackPressed() )
-		cpuEngine.Quit();
 }
 
 void App::OnExit()
