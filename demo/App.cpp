@@ -146,11 +146,12 @@ void App::OnStart()
 	m_entityCircleBlack = cpuEngine.CreateEntity();
 	m_entityCircleBlack->pMesh = &m_meshCircleBlack;
 	m_entityCircleBlack->transform.pos.y += 0.1f;
+	m_entityCircleBlack->transform.pos.z -= 0.18f;
 
 
 	float lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche = 2.0f;
 	cpu_camera* cam = cpuEngine.GetCamera();
-	cam->transform.pos.y = 1.5f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
+	cam->transform.pos.y = 2.5f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
 	cam->transform.pos.z = -5.0f * lefacteurnestpaspasserilnepasserajamaislundimardimercredijeudivendredisamedidimanche;
 	cam->transform.SetYPR(0.0f, 0.2f, 0.0f);
 
@@ -158,7 +159,7 @@ void App::OnStart()
 	m_intervalSpawn = 1.0f;
 	m_timestock = 0.0f;
 	m_score = 0;
-	m_life = 3;
+	m_life = 5;
 	m_pause = false;
 
 }
@@ -172,6 +173,18 @@ void App::OnUpdate()
 	// YOUR CODE HERE
 	if (m_pause == true)
 	{
+		if (cpuInput.vi.IsKey('P'))
+		{
+			for (auto it = m_elements.begin(); it != m_elements.end();)
+			{
+				cpu_entity* pMissile = *it;
+				cpuEngine.Release(pMissile);
+				it = m_elements.erase(it);
+			}
+			m_pause = false;
+			m_life = 5;
+			m_score = 0;
+		}
 		return;
 	}
 
@@ -305,7 +318,14 @@ void App::OnRender(int pass)
 
 			std::string info = "SCORE : " + CPU_STR(m_score);
 			info += "\n";
-			info += "La Vie La Vrai : " + CPU_STR(m_life);
+			info += "La Vie La Vraie : " + CPU_STR(m_life);
+
+			if (m_pause == true)
+			{
+				info += "\n";
+				info += "Rejoue avec PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP";
+			}
+
 
 			XMFLOAT3 tint = { 1.0f, 1.0f, 0.8f };
 			cpuDevice.DrawText(&m_font, info.c_str(), (int)(cpuDevice.GetWidth() * 0.5f), 10, CPU_TEXT_CENTER, &tint);
@@ -443,8 +463,8 @@ void App::CheckCollisionElement()
 
 void App::ResolveCollisionElement(cpu_entity* p_red)
 {
-	m_score += 1;
-
+	m_score += 9999;
+	m_pShip->SetHit(true);
 
 
 }
@@ -478,6 +498,8 @@ void Ship::Create(cpu_mesh* pMesh, cpu_material* pMaterial)
 	m_pFSM->SetPostGlobal<StateShipGlobal>();
 	m_pFSM->Add<StateShipIdle>();
 	m_pFSM->Add<StateShipBlink>();
+
+	m_hit = false;
 }
 
 void Ship::Destroy()
@@ -626,7 +648,7 @@ void StateShipIdle::OnEnter(Ship& cur, int from, void* pParam)
 void StateShipIdle::OnExecute(Ship& cur)
 {
 	// Blink every 3 seconds
-	if ( cur.GetFSM()->totalTime>3.0f )
+	if ( cur.GetHit())
 	{
 		cur.GetFSM()->ToState(CPU_ID(StateShipBlink));
 		return;
@@ -660,6 +682,7 @@ void StateShipBlink::OnExecute(Ship& cur)
 	if ( cur.GetFSM()->totalTime>1.0f )
 	{
 		cur.GetFSM()->ToState(CPU_ID(StateShipIdle));
+		cur.SetHit(false);
 		return;
 	}
 }
