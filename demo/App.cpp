@@ -45,7 +45,20 @@ void App::SpawnMissileWithMouse()
 	pMissile->transform.pos = ray.pos;
 	pMissile->transform.LookTo(ray.dir);
 	pMissile->transform.Move(1.5f);
-	pMissile->pMaterial = &m_materialMissile;
+
+	cpu_material* material = new cpu_material;
+	m_materials.push_back(material);
+	pMissile->pMaterial = material;
+	float r = rand() % 101;
+	float g = rand() % 101;
+	float b = rand() % 101;
+	r *= 0.01f;
+	g *= 0.01f;
+	b *= 0.01f;
+	pMissile->pMaterial->color.x = r;
+	pMissile->pMaterial->color.y = g;
+	pMissile->pMaterial->color.z = b;
+
 	m_missiles.push_back(pMissile);
 }
 
@@ -79,8 +92,8 @@ void App::OnStart()
 	m_pSprite->y = 0;
 
 	// Shader
-	m_materialShip.color = cpu::ToColor(255, 128, 0);
-	m_materialMissile.ps = MissileShader;
+	//m_materialShip.color = cpu::ToColor(255, 128, 0);
+//	m_materialMissile.ps = MissileShader;
 	m_materialMoon.ps = MoonShader;
 	m_materialEarth.pTexture = &m_textureEarth;
 
@@ -103,17 +116,19 @@ void App::OnStart()
 	m_pShip->GetFSM()->ToState(CPU_ID(StateShipIdle));
 
 	// Particle
-	/*cpuEngine.GetParticleData()->Create(2000000);
+	cpuEngine.GetParticleData()->Create(2000000);
 	cpuEngine.GetParticlePhysics()->gy = -0.5f;
+
 	m_pEmitter = cpuEngine.CreateParticleEmitter();
 	m_pEmitter->rate = 1.0f;
 	m_pEmitter->colorMin = cpu::ToColor(255, 0, 0);
 	m_pEmitter->colorMax = cpu::ToColor(255, 128, 0);
+
 	m_pEmitter2 = cpuEngine.CreateParticleEmitter();
 	m_pEmitter2->rate = 0.25f;
 	m_pEmitter2->colorMin = cpu::ToColor(0, 0, 255);
 	m_pEmitter2->colorMax = cpu::ToColor(0, 128, 255);
-	m_pEmitter2->pos.x = -2.0f;*/
+	m_pEmitter2->pos.x = -2.0f;
 
 	// Test
 	//m_pEmitter->blend = CPU_PARTICLE_OPAQUE;
@@ -267,6 +282,12 @@ void App::OnExit()
 		m_pShip->Destroy();
 	CPU_DELPTR(m_pShip);
 	m_missiles.clear();
+
+	for (cpu_material* mat : m_materials)
+	{
+		delete mat;
+	}
+	m_materials.clear();
 }
 
 void App::OnRender(int pass)
@@ -383,8 +404,34 @@ void App::SpawnElement()
 
 	cpu_entity* element = cpuEngine.CreateEntity();
 	element->pMesh = &m_meshMissile;
+
+		/*float r = rand() % 101;
+		float g = rand() % 101;
+		float b = rand() % 101;
+		r *= 0.01f;
+		g *= 0.01f;
+		b *= 0.01f;
+	for ( int i = 0; i < element->pMesh->vertices.size(); i++)
+	{
+
+		element->pMesh->vertices[i].color.x = r;
+		element->pMesh->vertices[i].color.y = g;
+		element->pMesh->vertices[i].color.z = b;
+	}*/
+	
 	element->transform.SetScaling(0.2f);
-	element->pMaterial = &m_materialMissile;
+	cpu_material* material = new cpu_material;
+	m_materials.push_back(material);
+	element->pMaterial = material;
+	float r = rand() % 101;
+	float g = rand() % 101;
+	float b = rand() % 101;
+	r *= 0.01f;
+	g *= 0.01f;
+	b *= 0.01f;
+	element->pMaterial->color.x = r;
+	element->pMaterial->color.y = g;
+	element->pMaterial->color.z = b;
 
 	XMFLOAT3 pos = element->transform.pos;
 	XMFLOAT3 up = element->transform.up;

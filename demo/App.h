@@ -77,6 +77,7 @@ private:
 
 	bool m_pause;
 
+	std::vector<cpu_material*> m_materials;
 
 
 };
